@@ -33,6 +33,7 @@ class HandAnalyzer{
 
 	unsigned int getHandSize()const;
 	bool isRoyalFlush()const;
+	bool isStraightFlush()const;
 	bool isFourOfAKind()const;
 	bool isFullHouse()const;
 	bool isFlush()const;

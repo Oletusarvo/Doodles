@@ -45,6 +45,23 @@ bool HandAnalyzer::isRoyalFlush()const{
     return true;
 }
 
+bool HandAnalyzer::isStraightFlush()const{
+    for(unsigned int i = 1; i < m_hand.size(); ++i){
+        const Card &previousCard = m_hand[i - 1];
+        const Card &currentCard = m_hand[i];
+
+        if(previousCard.getSuite() != currentCard.getSuite()){
+            return false;
+        }
+
+        if(previousCard.getValue() != currentCard.getValue() - 1){
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool HandAnalyzer::isFourOfAKind()const{
     for(unsigned int c : m_cardCount){
         if(c == 4){
@@ -126,6 +143,10 @@ HandInfo HandAnalyzer::getHandInfo()const{
     if(isRoyalFlush()){
         info.value = ROYAL_FLUSH;
         info.high = CardValue::ACE;
+    }
+    else if(isStraightFlush()){
+        info.value = STRAIGHT_FLUSH;
+        info.high = m_hand.back().getValue();
     }
     else if(isFourOfAKind()){
         info.value = FOUR_OF_A_KIND;
@@ -245,6 +266,9 @@ const char *handValueToString(unsigned int value){
         case FOUR_OF_A_KIND:
         return "Four of a kind";
 
+        case STRAIGHT_FLUSH:
+        return "Straight flush";
+
         case ROYAL_FLUSH:
         return "Royal flush";
 
@@ -257,29 +281,32 @@ std::ostream &operator<<(std::ostream &os, const HandInfo &info){
     const char *stringValue = handValueToString(info.value);
     os << "Value: " << stringValue;
 
-    if(info.value == HIGH){
-        os << " Card: " << info.high;
+    if(info.value == STRAIGHT_FLUSH){
+        os << " High: " << info.high;
     }
-    else if(info.value == TWO_OF_A_KIND){
+    else if(info.value == FOUR_OF_A_KIND){
+        os << " Cards: " << info.rparam;
+    }
+    else if(info.value == FULL_HOUSE){
+        os << " Cards: Three: " << info.rparam << " Two: " << info.lparam;
+    }
+    else if(info.value == FLUSH){
+        os << " High: " << info.high;
+    }
+    else if(info.value == STRAIGHT){
+        os << " High: " << info.high;
+    }
+    else if(info.value == THREE_OF_A_KIND){
         os << " Card: " << info.rparam;
     }
     else if(info.value == TWO_PAIR){
         os << " Cards: " << info.rparam << " and " << info.lparam;
     }
-    else if(info.value == THREE_OF_A_KIND){
+    else if(info.value == TWO_OF_A_KIND){
         os << " Card: " << info.rparam;
     }
-    else if(info.value == STRAIGHT){
-        os << " High: " << info.high;
-    }
-    else if(info.value == FLUSH){
-        os << " High: " << info.high;
-    }
-    else if(info.value == FULL_HOUSE){
-        os << " Cards: Three: " << info.rparam << " Two: " << info.lparam;
-    }
-    else if(info.value == FOUR_OF_A_KIND){
-        os << " Cards: " << info.rparam;
+    else if(info.value == HIGH){
+        os << " Card: " << info.high;
     }
 
     return os;
