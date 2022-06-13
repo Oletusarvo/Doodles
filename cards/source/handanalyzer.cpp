@@ -46,20 +46,7 @@ bool HandAnalyzer::isRoyalFlush()const{
 }
 
 bool HandAnalyzer::isStraightFlush()const{
-    for(unsigned int i = 1; i < m_hand.size(); ++i){
-        const Card &previousCard = m_hand[i - 1];
-        const Card &currentCard = m_hand[i];
-
-        if(previousCard.getSuite() != currentCard.getSuite()){
-            return false;
-        }
-
-        if(previousCard.getValue() != currentCard.getValue() - 1){
-            return false;
-        }
-    }
-
-    return true;
+    return isStraight() && isFlush();
 }
 
 bool HandAnalyzer::isFourOfAKind()const{
