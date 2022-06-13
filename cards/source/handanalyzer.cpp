@@ -28,21 +28,7 @@ bool HandAnalyzer::isRoyalFlush()const{
         return false;
     }
 
-    for(unsigned int i = 1; i < m_hand.size(); ++i){
-        const Card &previousCard = m_hand[i - 1];
-        const Card &currentCard = m_hand[i];
-
-        //All cards have to be of the same suite and consequtive cards need to be of one higher value than the previous.
-        if(currentCard.getSuite() != previousCard.getSuite()){
-            return false;
-        }
-
-        if(currentCard.getValue() != previousCard.getValue() + 1){
-            return false;
-        }
-    }
-
-    return true;
+    return isStraightFlush();
 }
 
 bool HandAnalyzer::isStraightFlush()const{
