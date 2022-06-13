@@ -255,13 +255,31 @@ const char *handValueToString(unsigned int value){
 
 std::ostream &operator<<(std::ostream &os, const HandInfo &info){
     const char *stringValue = handValueToString(info.value);
+    os << "Value: " << stringValue;
 
     if(info.value == HIGH){
-        os << "Value: " << stringValue << " Card: " << info.high;
+        os << " Card: " << info.high;
     }
-
-    if(info.value == TWO_OF_A_KIND){
-        os << "Value: " << stringValue << " Card: " << info.rparam;
+    else if(info.value == TWO_OF_A_KIND){
+        os << " Card: " << info.rparam;
+    }
+    else if(info.value == TWO_PAIR){
+        os << " Cards: " << info.rparam << " and " << info.lparam;
+    }
+    else if(info.value == THREE_OF_A_KIND){
+        os << " Card: " << info.rparam;
+    }
+    else if(info.value == STRAIGHT){
+        os << " High: " << info.high;
+    }
+    else if(info.value == FLUSH){
+        os << " High: " << info.high;
+    }
+    else if(info.value == FULL_HOUSE){
+        os << " Cards: Three: " << info.rparam << " Two: " << info.lparam;
+    }
+    else if(info.value == FOUR_OF_A_KIND){
+        os << " Cards: " << info.rparam;
     }
 
     return os;
