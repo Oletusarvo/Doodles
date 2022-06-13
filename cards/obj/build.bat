@@ -1,0 +1,1 @@
+cl /c /EHsc ../source/*.cpp

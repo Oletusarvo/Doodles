@@ -1,0 +1,1 @@
+cl main.cpp /link lib/cards.lib
