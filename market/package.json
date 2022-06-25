@@ -1,0 +1,21 @@
+{
+  "name": "market",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./market.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "Jens Österberg",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/uniqid": "^5.3.2",
+    "browserify": "^17.0.0",
+    "jest": "^27.5.1"
+  },
+  "dependencies": {
+    "uniqid": "^5.4.0"
+  }
+}

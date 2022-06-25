@@ -5,3 +5,6 @@ main.exe
 main.cpp
 run.bat
 compile.bat
+cards/test
+node_modules
+market/src/js

@@ -24,15 +24,45 @@ unsigned int HandAnalyzer::getHandSize()const{
 bool HandAnalyzer::isRoyalFlush()const{
 
     //A royal flush begins with a 10.
-    if(m_hand[0].getValue() != 10){
+    if(m_hand.front().getValue() != 10){
         return false;
     }
 
-    return isStraightFlush();
+    for(unsigned int i = 1; i < m_hand.size(); ++i){
+        const Card &previousCard = m_hand[i - 1];
+        const Card &currentCard = m_hand[i];
+
+        if(previousCard.getValue() != currentCard.getValue() - 1){
+            return false;
+        }
+
+        if(currentCard.getSuite() != previousCard.getSuite()){
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool HandAnalyzer::isStraightFlush()const{
-    return isStraight() && isFlush();
+    /*
+        Will only return true if hand is a straight flush, but not a royal flush.
+    */
+
+    for(unsigned int i = 1; i < m_hand.size(); ++i){
+        const Card &previousCard = m_hand[i - 1];
+        const Card &currentCard = m_hand[i];
+
+        if(previousCard.getValue() != currentCard.getValue() - 1){
+            return false;
+        }
+
+        if(currentCard.getSuite() != previousCard.getSuite()){
+            return false;
+        }
+    }
+
+    return m_hand.front().getValue() != 10;
 }
 
 bool HandAnalyzer::isFourOfAKind()const{
@@ -46,23 +76,41 @@ bool HandAnalyzer::isFourOfAKind()const{
 }
 
 bool HandAnalyzer::isThreeOfAKind()const{
+    /*
+        Will only return true if the hand has threes and is not a full house.
+    */
+    bool hasThrees = false;
+    bool hasPair = false;
+
     for(unsigned int c : m_cardCount){
         if(c == 3){
-            return true;
+            hasThrees = true;
+        }
+        else if(c == 2){
+            hasPair = true;
         }
     }
     
-    return false;
+    return hasThrees && !hasPair;
 }
 
 bool HandAnalyzer::isTwoOfAKind()const{
+    /*
+        Will only return true if the hand has a pair and is not a full house.
+    */
+    unsigned int pairCount = 0;
+    bool hasThrees = false;
+
     for(unsigned int c : m_cardCount){
         if(c == 2){
-            return true;
+            pairCount++;
+        }
+        else if(c == 3){
+            hasThrees = true;
         }
     }
     
-    return false;
+    return pairCount == 1 && !hasThrees;
 }
 
 bool HandAnalyzer::isTwoPair()const{
@@ -79,19 +127,33 @@ bool HandAnalyzer::isTwoPair()const{
 
 bool HandAnalyzer::isStraight()const{
 
+    /*
+        Will return true only if the hand is straight, but isn't a straight flush or royal flush.
+    */
+    unsigned int flush = 1;
+    unsigned int straight = 1;
+
     for(unsigned int i = 1; i < m_hand.size(); ++i){
         const Card &previousCard = m_hand[i - 1];
         const Card &currentCard = m_hand[i];
 
-        if(currentCard.getValue() != previousCard.getValue() + 1){
+        if(previousCard.getValue() != currentCard.getValue() - 1){
             return false;
         }
+
+        flush &= previousCard.getSuite() == currentCard.getSuite();
     }
 
-    return true;
+
+    return !flush;
 }
 
 bool HandAnalyzer::isFlush()const{
+
+    /*
+        Will only return true if the hand is a flush, but not a straight flush or a royal flush.
+    */
+
 
     for(unsigned int i = 1; i < m_hand.size(); ++i){
         const Card &previousCard = m_hand[i - 1];
@@ -102,11 +164,23 @@ bool HandAnalyzer::isFlush()const{
         }
     }
 
-    return true;
+    return !isStraight();
 }
 
 bool HandAnalyzer::isFullHouse()const{
-    return isThreeOfAKind() && isTwoOfAKind();
+    bool hasThrees = false;
+    bool hasPair = false;
+
+    for(unsigned int c : m_cardCount){
+        if(c == 2){
+            hasPair = true;
+        }
+        else if(c == 3){
+            hasThrees = true;
+        }
+    }
+
+    return hasPair && hasThrees;
 }
 
 HandInfo HandAnalyzer::getHandInfo()const{
