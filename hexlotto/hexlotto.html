@@ -1,0 +1,318 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head>
+		<title>Lotto</title>
+		
+		<style>
+			*{
+				box-sizing: border-box;
+				font-family: monospace;
+			}
+			
+			body{
+				width: 100vw;
+				height: 100vh;
+				margin: 0;
+				padding: 0;
+				
+				display: flex;
+				flex-flow: column;
+				align-items: center;
+				justify-content: center;
+				gap: 1rem;
+			}
+			
+			.number-display, .open-button, .compare-button{
+				font-size : 3rem;
+				background: lightgray;
+				padding: 1rem;
+				border-radius: 10px;
+				width: 500px;
+				display: flex;
+				flex-flow: row;
+				justify-content: center;
+				align-items: center;
+				resize: none;
+				transition: background-color 0.2s ease-out;
+			}
+			
+			@keyframes displayAnimationRejected{
+				0% {transform: translate(0px, 0px);}
+				25% {transform: translate(-7px, 0px);}
+				50% {transform: translate(0px, 0px);}
+				75% {transform: translate(7px, 0px);}
+				100% {transform: translate(0px, 0px);}
+
+			}
+
+			@keyframes displayAnimationAccepted{
+				0% {font-size: 3rem;}
+				50% {font-size: 3.2rem;}
+				100% {font-size: 3rem;}
+			}
+
+			.number-display{
+				background: rgb(150, 225, 255);
+				border: 2px solid gray;
+			}
+
+			.numbers{
+				transition: transform 0.1s ease-out;
+			}
+			
+			.info-display{
+				font-size: 2rem;
+				text-align: center;
+				height: 1rem;
+				width: 500px;
+			}
+			
+			.open-button, .compare-button{
+				cursor: pointer;
+				border: 2px solid gray;
+			}
+			
+			.compare-button{
+				font-size: 2rem;
+				visibility: hidden;
+			}
+			
+			.number-display.accepted{
+				background: limegreen;
+			}
+
+			.number-display.rejected{
+				background: rgb(255, 117, 117);
+			}
+
+			.numbers.rejected{
+				animation-name: displayAnimationRejected;
+				animation-duration: 1s;
+			}
+
+			.numbers.accepted{
+				
+				animation-duration: 1s;
+			}
+			
+			::selection{
+				background: none;
+			}
+			
+			.numpad-buttons{
+				display: grid;
+				grid-template-columns: 1fr 1fr 1fr;
+				gap: 1rem;
+				width: 500px;
+			}
+			
+			.numpad{
+				display: flex;
+				flex-flow: column;
+				gap: 1rem;
+			}
+			
+			
+			.numpad-button{
+				background: lightgray;
+				border: 2px solid gray;
+				border-radius: 10px;
+				height: 3rem;
+				display: flex;
+				flex-flow: column;
+				align-items: center;
+				justify-content: center;
+				font-size: 2rem;
+				font-weight: bold;
+				
+				cursor: pointer;
+			}
+			
+			.numpad-button:hover, .open-button:hover{
+				background: rgb(244, 244, 244);
+			}
+			
+		</style>
+	</head>	
+	
+	<body>
+		
+		<div class="numpad">
+			<div class="number-display">
+				<div class="numbers"></div>
+			</div>
+		</div>
+		
+		<div class="open-button">Guess</div>
+		<div class="info-display"></div>
+	</body>
+	
+	<script>
+		const numberDisplay = document.querySelector('.numbers');
+		const openButton = document.querySelector('.open-button');
+		const infoDisplay = document.querySelector('.info-display');
+		const numPad = document.querySelector('.numpad');
+		const numBits = 6;
+		const firstBit = 0xF << ((numBits - 1) * 0x4);
+		const displayHelp = false;
+
+		let inputCursor = 0;
+		
+		const baseLineNumber = Array(numBits).fill('0').join('');
+		const mystery = new Date().getTime();
+		let num = baseLineNumber;
+		numberDisplay.innerHTML = '0x' + baseLineNumber;
+		
+		function setNumberDisplay(val){
+			numberDisplay.innerHTML = '0x' + (baseLineNumber + val.toString(16)).slice(-numBits).toUpperCase();
+		}
+		
+		function retreatInputCursor(){
+			//inputCursor != firstBit ? inputCursor <<= 0x4 : 0;
+			return inputCursor > 0 ? inputCursor-- : 0;
+		}
+		
+		function advanceInputCursor(){
+			//inputCursor != 1 ? inputCursor >>= 0x4 : 0;
+			return inputCursor < numBits ? inputCursor++ : 0;
+		}
+		
+		function generateNumpad(){
+			
+			const numpadButtons = document.createElement('div');
+			numpadButtons.classList.add('numpad-buttons');
+			numPad.appendChild(numpadButtons);
+				
+			let buttonNumber = 1;
+			for(let row = 0; row < 5; ++row){
+				for(let col = 0; col < 3; ++col){
+					const btn = document.createElement('div');
+					btn.classList.add('numpad-button');
+					btn.id = buttonNumber.toString();
+					
+					btn.onclick = () => {
+						if(inputCursor < numBits){
+							const n = parseInt(btn.id);
+							num = num == 0x0 ? num | n : num << 0x4 | n;
+							setNumberDisplay(num);
+							advanceInputCursor();
+						}
+					}
+					
+					btn.innerHTML = (buttonNumber++).toString(16).toUpperCase();
+					
+					numpadButtons.appendChild(btn);
+				}
+			}
+			
+			const zeroButton = document.createElement('div'), backButton = document.createElement('div'), clearButton = document.createElement('div');
+			zeroButton.classList.add('numpad-button');
+			backButton.classList.add('numpad-button');
+			clearButton.classList.add('numpad-button');
+			
+			zeroButton.innerHTML = '0';
+			backButton.innerHTML = '<';
+			clearButton.innerHTML = 'CLS';
+			
+			zeroButton.onclick = () => {
+				if(inputCursor < numBits){
+					num = num << 0x4;
+					setNumberDisplay(num);
+					advanceInputCursor();
+				}
+				
+			}
+			
+			backButton.onclick = () => {
+				num >>= 0x4;
+				retreatInputCursor();
+				setNumberDisplay(num);
+			}
+			
+			clearButton.onclick = clearScreen;
+			
+			numpadButtons.appendChild(zeroButton);
+			numpadButtons.appendChild(backButton);
+			numpadButtons.appendChild(clearButton);
+		}
+		
+		function countMatchingBits(num1, num2){
+			let matches = 0;
+			
+			for(let mask = 0xF << (0x4 * (numBits - 1)); mask > 0; mask >>= 0x4){
+				let val1 = mask & num1;
+				let val2 = mask & num2;
+				
+				matches += (val1 == val2);
+			}
+			
+			return matches;
+		}
+		
+		function generateNumber(){
+			num = Math.round(Math.random() * Number.MAX_SAFE_INTEGER) & (Math.pow(16, numBits) - 1);
+			
+			
+			setNumberDisplay(num);
+			numberDisplay.style.backgroundColor = 'skyblue';
+			infoDisplay.innerHTML = '';
+			
+			compare();
+		}
+		
+		function clearScreen(){
+			num = baseLineNumber;
+			setNumberDisplay(num);
+			inputCursor = 0;
+		}
+		
+		function compare(){
+			const mask = parseInt('0x' + Array(numBits).fill('f').join(''));
+			
+			//console.log(mask.toString(16))
+			
+			//console.log((mystery & mask).toString(16), (num & mask).toString(16));
+			
+			const matches = countMatchingBits(mystery & mask, num & mask);
+			const color = matches >= Math.floor(numBits * 0.8) ? 'orange' : 'red';
+			
+			const parsedNumber = parseInt(num);
+			
+			//console.log(`Number parsed: ${parsedNumber.toString(16)}`);
+			if((parsedNumber & mask) == (mystery & mask)){
+				document.querySelector('.number-display').classList.add('accepted');
+				numberDisplay.classList.add('accepted');
+				numberDisplay.classList.remove('rejected');
+				infoDisplay.innerHTML = 'Congratulations! It\'s a match!';
+				infoDisplay.style.color = 'green';
+			}
+			else{
+				numberDisplay.classList.add('rejected');
+				document.querySelector('.number-display').classList.add('rejected');
+
+				if(displayHelp){
+					const str = matches > 0 ? 'Partial match.' : 'No match.';
+				
+					infoDisplay.innerHTML = `${str} Matching bits: ${matches}`;
+					infoDisplay.style.color = color;
+				}
+				
+				setTimeout(() => {
+					numberDisplay.classList.remove('rejected');
+					
+
+					
+				}, 100);
+
+				setTimeout(() => {
+					document.querySelector('.number-display').classList.remove('rejected');
+					clearScreen();
+				}, 500);
+			}
+		}
+		
+		generateNumpad();
+		openButton.addEventListener('click', compare);
+	</script>
+</html>

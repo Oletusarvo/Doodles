@@ -1,0 +1,1 @@
+A lottery where you have to guess the hidden hexadecimal number.
